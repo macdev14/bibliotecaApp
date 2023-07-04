@@ -1,0 +1,1 @@
+type Permissao = 'super_user' | 'normal_user' ;
