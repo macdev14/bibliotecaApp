@@ -26,7 +26,7 @@ function SignIn() {
             Entrar
           </Heading>
 
-          <FormControl isInvalid>
+          <FormControl>
             <FormControl.Label>Usuário</FormControl.Label>
             <Input placeholder="seu usuario"
             onChangeText={setUsuario}

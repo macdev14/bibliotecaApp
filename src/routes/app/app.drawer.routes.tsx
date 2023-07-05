@@ -2,17 +2,21 @@ import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import {MaterialIcons} from '@expo/vector-icons'
 import { TabRoutes } from "./app.tab.routes";
+import DrawerContent from "../../components/DrawerContent";
 const {Screen, Navigator} = createDrawerNavigator()
+
+
 
 export function DrawerRoutes() {
     return(
         <Navigator
+        drawerContent={props => <DrawerContent {...props} />}
         screenOptions={{  headerShown:false}}
         >
             <Screen name="TabRoutes" component={TabRoutes}
             options={
                 {
-                    drawerLabel: "Home",
+                    drawerLabel: "Livros",
                     drawerIcon: () => (
                         <MaterialIcons name="home" size={22} />
                     )
@@ -20,16 +24,6 @@ export function DrawerRoutes() {
             }
             
             />
-            {/* <Screen name="screenB" component={ScreenB} options={
-                {
-                    drawerLabel: "Sair",
-                    drawerIcon: () => (
-                        <MaterialIcons name="logout" size={22} />
-                    )
-                }
-            }
-           
-            /> */}
         </Navigator>
     )
 }

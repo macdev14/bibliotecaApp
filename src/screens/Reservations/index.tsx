@@ -1,5 +1,5 @@
 import React from "react";
 import { Text } from "react-native";
-export const Reservation = () => {
+export const Reservations = () => {
   return <Text>Livros</Text>;
 };

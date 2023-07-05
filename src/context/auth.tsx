@@ -6,12 +6,11 @@ import {
   useState,
 } from 'react';
 //   import * as auth from '../services/auth';
-import React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Q } from '@nozbe/watermelondb';
 import { database } from '../databases';
 import UserModel from '../databases/models/userModel';
-import { hashPassword, verifyPassword } from '../services/crypto';
+import { hashPassword, verifyPassword } from '../utils/crypto';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
@@ -49,13 +48,13 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
         return;
       }
       const user : UserModel = users[0];
-      const { username, permissions } = user
+      const { username, permissions, id } = user
       console.log('JSON OBJECT: ', user);
       const valid = await verifyPassword(password, user.password)
       if (valid) {
         console.log('Login bem-sucedido!');
-        await AsyncStorage.setItem('@RNAuth:user', JSON.stringify({ username, permissions }));
-        setUser({ username, permissions });
+        await AsyncStorage.setItem('@RNAuth:user', JSON.stringify({ username, permissions, id }));
+        setUser({ username, permissions, id });
       } else {
         Alert.alert('Credenciais inválidas!');
       }

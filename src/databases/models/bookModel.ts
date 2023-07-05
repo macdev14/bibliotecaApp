@@ -9,9 +9,12 @@ class BookModel extends Model {
       'reservations': { type: 'has_many', foreignKey: 'book_id' },
     };
 
-    @field('title') title!: string;
+    @field('name') name!: string;
     
     @field('author') author!: string;
+
+    @field('uri') uri!: string;
+  
   
     @relation('users', 'user_id') users;
 

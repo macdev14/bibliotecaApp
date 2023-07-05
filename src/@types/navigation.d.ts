@@ -3,6 +3,10 @@ export declare global{
         interface RootParamList{
             SignUp: undefined;
             SignIn: undefined;
+            Books: undefined;
+            Reservations: undefined;
+            BookDetails: { [id: string]: string; };
+
         }
     }
 }
@@ -12,9 +16,9 @@ type StackParamList = {
     SignIn:undefined;
 }
 
-
 type StackProps = NativeStackScreenProps<StackParamList, 'SignIn'>
 
 type Props = {
     routes: StackProps
 }
+

@@ -11,8 +11,12 @@ export const bookSchema = tableSchema({
             name: 'author',
             type:'string'
         },
+        {
+            name: 'uri',
+            type:'string'
+        },
         { 
-         name: 'users_id',
+         name: 'user_id',
          type: 'string', 
          isIndexed: true 
         },

@@ -5,6 +5,12 @@
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "android": {
+      "package": "com.macdev.bibliotecaApp"
+    },
+    "ios": {
+      "bundleIdentifier": "com.macdev.bibliotecaApp"
+    }
   }
 }

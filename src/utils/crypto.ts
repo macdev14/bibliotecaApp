@@ -1,6 +1,5 @@
 import * as Crypto from 'expo-crypto';
 
-// Hash a password
 export const hashPassword = async (password: string) => {
   const hashedPassword = await Crypto.digestStringAsync(
     Crypto.CryptoDigestAlgorithm.SHA256,
@@ -9,7 +8,6 @@ export const hashPassword = async (password: string) => {
   return hashedPassword;
 };
 
-// Verify a password
 export const verifyPassword = async (password: string, hashedPassword: string) => {
   const inputHash = await Crypto.digestStringAsync(
     Crypto.CryptoDigestAlgorithm.SHA256,

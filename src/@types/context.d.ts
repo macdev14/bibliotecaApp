@@ -1,7 +1,8 @@
 type Permissao = 'super_user' | 'normal_user' ;
 interface User {
     username: string;
-    permissions : Permissao
+    permissions : Permissao;
+    id : string;
   }
   
 

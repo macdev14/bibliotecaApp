@@ -1,4 +1,4 @@
-package com.bibliotecaapp;
+package com.macdev.bibliotecaApp;
 
 import android.os.Build;
 import android.os.Bundle;

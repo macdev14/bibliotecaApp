@@ -4,7 +4,7 @@ import { bookSchema } from './bookSchema';
 import { reservationSchema } from './reservationSchema';
 
 export const schemas = appSchema({
-    version: 4,
+    version: 8,
     tables: [
         usersSchema, bookSchema, reservationSchema
     ],
