@@ -5,24 +5,11 @@ import { Reservations } from "../../screens/Reservations";
 const { Screen, Navigator } = createNativeStackNavigator()
 import {MaterialIcons} from "@expo/vector-icons"
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { AdminReservations } from "../../screens/AdminReservations";
 import { MenuIcon } from "../../components/StackMenuIcon";
+import { AdminReservations } from "../../screens/AdminReservations";
+import { Users } from "../../screens/Users";
 
-
-
-export function BookStackRoutes(){
-    return(
-        <Navigator  screenOptions={({ navigation }) => ({
-            headerLeft: () => (
-                <MenuIcon navigation={navigation}/>  
-            ),
-          })}>
-            <Screen name="Livros" component={Books} />
-        </Navigator>
-    )
-}
-
-export function ReservationStackRoutes(){
+export function AdminStackReservationRoutes(){
     return(
         <Navigator
         screenOptions={({ navigation }) => ({
@@ -31,8 +18,21 @@ export function ReservationStackRoutes(){
             ),
           })}
         >
-            <Screen name="Reservas" component={Reservations} />
+            <Screen name="Admin" component={AdminReservations} />
         </Navigator>
     )
 }
 
+export function AdminUserManageRoutes(){
+    return(
+        <Navigator
+        screenOptions={({ navigation }) => ({
+            headerLeft: () => (
+                <MenuIcon navigation={navigation}/>  
+            ),
+          })}
+        >
+            <Screen name="Usuarios" component={Users} />
+        </Navigator>
+    )
+}

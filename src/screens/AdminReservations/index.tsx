@@ -12,7 +12,7 @@ import { Q } from "@nozbe/watermelondb";
 import ReservationModel from "../../databases/models/reservationModel";
 import { useIsFocused } from "@react-navigation/native";
 
-export const Books = () => {
+export const AdminReservations = () => {
   const { user } = useAuth();
   const isFocused = useIsFocused();
   const [books, setBooks] = useState([]);
@@ -23,11 +23,6 @@ export const Books = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   async function fetchData() {
     
-    // if(user.permissions == 'super_user'){
-    //   const bookDb = database.get<BookModel>('books');
-    //   const response = await bookDb.query().fetch();
-    //   return setBooks(response);
-    // }
     const reservedBooks = await database.collections
       .get<ReservationModel>('reservations')
       .query()
@@ -42,8 +37,8 @@ export const Books = () => {
 
     const availableBooks = allBooks.filter(book => !reservedBookIds.includes(book.id));
 
-    setBooks(availableBooks);
 
+    setBooks(availableBooks);
    }
 
    async function handleSave() {
@@ -74,7 +69,7 @@ export const Books = () => {
   
    }
    bottomSheetRef.current?.collapse();
-    fetchData();
+   fetchData();
   }
   catch (error) {
   console.log(error);    
