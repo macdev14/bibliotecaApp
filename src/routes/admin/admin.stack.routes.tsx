@@ -36,3 +36,11 @@ export function AdminUserManageRoutes(){
         </Navigator>
     )
 }
+
+function useRoute() {
+    throw new Error("Function not implemented.");
+}
+function useAuth(): { user: any; } {
+    throw new Error("Function not implemented.");
+}
+

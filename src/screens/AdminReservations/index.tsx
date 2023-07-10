@@ -3,186 +3,179 @@ import { FlatList, Alert, TouchableOpacity, StyleSheet, Image, KeyboardAvoidingV
 import { BookCard } from "../../components/BookCard";
 import { database } from "../../databases";
 import BookModel from "../../databases/models/bookModel";
-import BottomSheet, {BottomSheetTextInput} from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { Form, FormTitle, Container, Input } from "./styles";
 import { Ionicons, AntDesign } from '@expo/vector-icons';
-import { Text, Button, Icon } from "native-base";
+import { Text, Button, Icon, CheckIcon, Select } from "native-base";
 import { useAuth } from "../../context/auth";
 import { Q } from "@nozbe/watermelondb";
 import ReservationModel from "../../databases/models/reservationModel";
 import { useIsFocused } from "@react-navigation/native";
+import { fetchAvailableBooks, fetchAvailableBooksForUser, fetchAvailableBooksIncludeSelectedBook, fetchBooks, fetchUsers } from "../../services";
+import UserModel from "../../databases/models/userModel";
 
 export const AdminReservations = () => {
   const { user } = useAuth();
   const isFocused = useIsFocused();
-  const [books, setBooks] = useState([]);
+  
+  const [reservations, setReservations] = useState<ReservationModel[]>([]);
+  const [reservation, setReservation] = useState<ReservationModel>({} as ReservationModel);
   const [book, setBook] = useState<BookModel>({} as BookModel);
-  const [name, setName] = useState('');
-  const [author, setAuthor] = useState('');
-  const [uri, setUri] = useState('');
+  const [allBooks, setAllBooks] = useState<BookModel[]>([]);
+  const [availableBooks, setAvailableBooks] = useState<BookModel[]>([] as BookModel[]);
+  const [allUsers, setAllUsers] = useState<UserModel[]>([] as UserModel[]);
+
+  const [selectedBook, setSelectedBook] = useState('');
+  const [selectedUser, setSelectedUser] = useState('');
+
   const bottomSheetRef = useRef<BottomSheet>(null);
   async function fetchData() {
-    
     const reservedBooks = await database.collections
       .get<ReservationModel>('reservations')
       .query()
       .fetch();
 
-    const reservedBookIds = reservedBooks.map(reservation => reservation.bookId);
+    setReservations(reservedBooks);
+    console.log("livros reservados id",reservedBooks)
+    // fetchBooks(setAllBooks);
+    // const reservedBookIds = reservedBooks.map(reservation => reservation.bookId);
+    fetchAvailableBooksIncludeSelectedBook(selectedBook, setAvailableBooks);
+    fetchUsers(setAllUsers);
+  }
 
-    const allBooks = await database.collections
-      .get('books')
-      .query()
-      .fetch();
-
-    const availableBooks = allBooks.filter(book => !reservedBookIds.includes(book.id));
-
-
-    setBooks(availableBooks);
-   }
-
-   async function handleSave() {
+  async function handleSave() {
     try {
-    if(book.id)  {
-   await database.write(async () => {
-      await book.update(data=>{
-        data.name = name;
-        data.author = author;
-        data.uri = uri;      
-      })
-   })
-    } else{
-      console.log(user.id);
-    // const userDb = await database.get('users').query(Q.where('id', user.id));
-    
-    await database.write(async () => {
-      await database.get<BookModel>('books')
-      .create(data =>{
-        data.name = name;
-        data.author = author;
-        data.uri = uri;
-        data.users.id = user.id
-      })
-      
-     });
-     Alert.alert("Created!");
-  
-   }
-   bottomSheetRef.current?.collapse();
-   fetchData();
-  }
-  catch (error) {
-  console.log(error);    
-  }
-   }
+      if (reservation.id) {
+        await database.write(async () => {
+          await reservation.update(data => {
+            data.userId = selectedUser;
+            data.bookId = selectedBook;
+          })
+        }).then(() => Alert.alert("Reserva atualizada!")).catch(() => Alert.alert("Não foi possível atualizar reserva!"));
 
-   async function handleEdit(item: BookModel) {
-    setName(item.name);
-    setBook(item);
-    setUri(item.uri);
-    setAuthor(item.author);
+      } else {
+        const currentDate = new Date();
+
+        await database.write(async () => {
+          await database.get<ReservationModel>('reservations')
+            .create(data => {
+              data.userId = selectedUser;
+              data.bookId = selectedBook;
+              data.reservationDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
+            })
+        }).then(() => Alert.alert("Reserva cadastrada!")).catch(() => Alert.alert("Não foi possível cadastrar reserva!"));
+
+
+
+      }
+      bottomSheetRef.current?.collapse();
+      fetchData();
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleEdit(item: ReservationModel) {
+    setSelectedBook(item.bookId);
+    setSelectedUser(item.userId);
     bottomSheetRef.current?.expand();
-   
+
   }
 
-  async function handleReserve(item: BookModel) {
+  async function handleReserve(item: ReservationModel) {
     await database.write(async () => {
       await database.get<ReservationModel>('reservations')
-      .create(data =>{
-        data.book.id = item.id;
-        data.users.id = user.id
-      })
-      
-     });
+        .create(data => {
+          data.book.id = item.id;
+          data.users.id = user.id
+        })
+
+    });
     Alert.alert("Reserved!");
     fetchData();
   }
 
-  async function removeReserve(item: BookModel) {
-    await database.write(async () => {
-      await database.get<ReservationModel>('reservations')
-      .query(Q.where('books_id', item.id)).destroyAllPermanently();
-     });
-    bottomSheetRef.current?.expand();
-   
-  }
 
-  async function handleRemove(item: BookModel) {
+  async function handleRemove(item: ReservationModel) {
     await database.write(async () => {
       await item.destroyPermanently();
     });
-    setBook({} as BookModel);
+    setReservation({} as ReservationModel);
     fetchData();
-    Alert.alert("Deleted!");
+    Alert.alert("Reserva Excluída!");
   }
-  
-   useEffect(() => {
-     fetchData()
-   }, [isFocused]);
-   
-   console.log(book)
+
+  useEffect(() => {
+    fetchData()
+  }, [isFocused]);
+
+  console.log(reservation)
 
   return (
-  
 
-  <Container>
-  <FlatList
-  renderItem={({item})=><BookCard data={item}  onEdit={() => { handleEdit(item) }}
-  onRemove={() => handleRemove(item) }
-  onReserve={() => handleReserve(item)}
-  />}
-  data={books}
-  
-  /> 
-   
-        
-     
- <BottomSheet
+
+    <Container>
+      <FlatList
+        renderItem={({ item }) => <BookCard data={item} onEdit={() => { handleEdit(item) }}
+          onRemove={() => handleRemove(item)}
+          onReserve={() => handleReserve(item)}
+        />}
+        data={reservations}
+
+      />
+
+
+
+      <BottomSheet
         ref={bottomSheetRef}
         index={0}
         snapPoints={['4%', '65%']}
       >
-       <Form> 
-          <FormTitle>{book.name ? 'Alterar' : 'Adicionar'}</FormTitle>
+        <Form>
+          <FormTitle>{reservation.id ? 'Alterar' : 'Adicionar'}</FormTitle>
 
-          <BottomSheetTextInput
-            style={styles.textInput}
-            placeholder="Título"
-            onChangeText={setName}
-            value={name}
-          />
 
-          <BottomSheetTextInput
-            style={styles.textInput}
-            placeholder="Autor"
-            onChangeText={setAuthor}
-            value={author}
-          />
+          <Select borderColor="black" borderWidth="2" marginBottom={5} height={10} selectedValue={selectedUser} minWidth="200" accessibilityLabel="Selecione o Usuário" placeholder="Selecione o Usuário" _selectedItem={{
 
-          <BottomSheetTextInput
-            style={styles.textInput}
-            placeholder="Link da capa do livro"
-            onChangeText={setUri}
-            value={uri}
-          />
-          
+            endIcon: <CheckIcon size="5" />
+          }} mt={1} onValueChange={(value) => { fetchAvailableBooksForUser(value, setAvailableBooks); setSelectedUser(value) }}  >
+            {allUsers.map((user) => <Select.Item label={user.username} value={user.id} key={user.id} />)}
 
-   
-    
 
-<Button colorScheme="success" onPress={handleSave} >Salvar</Button>
-          </Form>
-       
+
+          </Select>
+
+          <Select borderColor="black" borderWidth="2" marginBottom={5} height={10} selectedValue={selectedBook} minWidth="200" accessibilityLabel="Selecione o Livro" placeholder="Selecione o Livro"
+            onValueChange={(value) => { setSelectedBook(value) }}
+            _selectedItem={{
+
+              endIcon: <CheckIcon size="5" />
+            }} mt={1}  >
+              
+            {availableBooks.map((book) => <Select.Item label={book.name} value={book.id} key={book.id} />)}
+
+          </Select>
+
+
+
+
+
+
+
+          <Button colorScheme="success" onPress={handleSave} >Salvar</Button>
+        </Form>
+
       </BottomSheet>
-       
-      </Container>
+
+    </Container>
   )
-  
+
 };
 
 const styles = StyleSheet.create({
 
-  antDesign:{
+  antDesign: {
     justifyContent: 'center',
     textAlign: "center",
     alignSelf: "stretch",

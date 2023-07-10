@@ -15,7 +15,8 @@ class BookModel extends Model {
 
     @field('uri') uri!: string;
   
-  
+    @field('user_id') userId!: string;
+
     @relation('users', 'user_id') users;
 
     @relation('reservations', 'book_id') reservations;

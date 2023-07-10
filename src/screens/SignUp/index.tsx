@@ -119,17 +119,6 @@ function SignUp() {
 
       </VStack>
 
-      <HStack alignItems="center" space={4}>
-        <Text>Dark</Text>
-        <Switch isChecked={colorMode === 'light'}
-          onToggle={toggleColorMode}
-          aria-label={
-            colorMode === 'light' ? 'troque para o tema escuro' : 'troque para o tema claro'
-          }
-        />
-        <Text>Light</Text>
-
-      </HStack>
 
     </Center>)
 }

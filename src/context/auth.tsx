@@ -23,9 +23,8 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     async function loadStorageData() {
       const storagedUser = await AsyncStorage.getItem('@RNAuth:user');
-      console.log('user', storagedUser);
       if (storagedUser) {
-        //api.defaults.headers.Authorization = `Bearer ${storagedToken}`;
+
         setUser(JSON.parse(storagedUser));
         setLoading(false);
       } else {

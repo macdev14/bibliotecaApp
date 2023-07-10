@@ -91,11 +91,13 @@ export const Books = () => {
   }
 
   async function handleReserve(item: BookModel) {
+    const currentDate = new Date();
     await database.write(async () => {
       await database.get<ReservationModel>('reservations')
       .create(data =>{
         data.book.id = item.id;
         data.users.id = user.id
+        data.reservationDate = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}/${currentDate.getFullYear()}`;
       })
       
      });

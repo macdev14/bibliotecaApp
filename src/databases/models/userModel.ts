@@ -1,3 +1,4 @@
+import { Q } from '@nozbe/watermelondb';
 import { field, relation } from '@nozbe/watermelondb/decorators';
 import Model, { Associations } from '@nozbe/watermelondb/Model';
 class UserModel extends Model {
@@ -17,6 +18,10 @@ class UserModel extends Model {
   // @relation('books', 'user_id') books;
 
   
+  get reservations() {
+    return this.collections.get('reservations').query(Q.where('user_id', this.id));
+  }
+
   get isSuperUser() {
     return this.permissions.includes('super_user');
   }

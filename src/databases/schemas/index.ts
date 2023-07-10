@@ -8,4 +8,5 @@ export const schemas = appSchema({
     tables: [
         usersSchema, bookSchema, reservationSchema
     ],
+
 }) ;
