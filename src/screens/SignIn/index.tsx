@@ -4,64 +4,73 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../context/auth";
+import { useForm } from 'react-hook-form';
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup"
+import { ControlledInput } from "../../components/ControlledInput";
+
+type FormData = {
+  username: string;
+  password: string;
+
+}
+
+
+const schema = yup.object({
+  username: yup.string().required("Informe seu usuario"),
+  password: yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Informe sua senha")
+})
+
 function SignIn() {
-  const { colorMode, toggleColorMode } = useColorMode();
-  const [usuario, setUsuario] = useState<string>();
-  const [senha, setSenha] = useState<string>();
+
+  const { control, handleSubmit, formState : {errors}} =  useForm({
+    resolver: yupResolver(schema)
+  })
+
   const { signIn } = useAuth()
   const navigation = useNavigation();
-  const handleSignIn = async () => {
-    signIn(usuario, senha)
+  const handleSignIn = (data : FormData) => {
+      signIn(data.username, data.password)
   }
+
+
+  
+ 
 
   return (
     <Center height="full" _dark={{ bg: "black", }} _light={{ bg: "white" }}>
-   
-      <VStack width={"full"} p="5">
-        <Box width="full" >
-          <Heading color={"coolGray.700"}
-            _dark={{ color: "white" }}
-            _light={{ color: "black" }}
+         <Heading color={"coolGray.700"} mb="10"
+        
           >
             Entrar
           </Heading>
+      <VStack width={"full"} p="5">
+        <Box width="full" >
+         
 
-          <FormControl>
-            <FormControl.Label>Usuário</FormControl.Label>
-            <Input placeholder="seu usuario"
-            onChangeText={setUsuario}
+          <ControlledInput
+        icon="user"
+        placeholder="Usuário"
+        name="username"
+        control={control}
+        error={errors.username}
+       
+      />
 
-              InputLeftElement={
-                <Icon as={<MaterialIcons name="person" />}
-                  size={5}
-                  ml={2}
-                  color="muted.400"
-                />
-              }
-            /> 
-        
-            <FormControl.Label>Senha</FormControl.Label>
-            <Input placeholder="sua senha"
-            onChangeText={setSenha}
+      <ControlledInput
+              control={control}
+              name="password"
+              icon="lock"
+              placeholder="Senha"
               secureTextEntry
-              InputLeftElement={
-                <Icon as={<MaterialIcons name="lock" />}
-                  size={5}
-                  ml={2}
-                  color="muted.400"
-                />
-              }
-
+              error={errors.password}
             />
-           <FormControl.ErrorMessage
-              leftIcon={<WarningOutlineIcon size="xs" />}
-            >
-              Credenciais inválidas
-            </FormControl.ErrorMessage>
-          </FormControl>
+        
+          
+      
 
-          <Button mt={12} colorScheme={"purple"}
-          onPress={handleSignIn}
+          <Button mt={12} colorScheme={"green"}
+          onPress={handleSubmit(handleSignIn)}
           >Entrar</Button>
 
         </Box>
@@ -69,7 +78,7 @@ function SignIn() {
       </VStack>
       <HStack alignItems="center" space={4}>
         <TouchableOpacity onPress={()=>navigation.navigate('SignUp')}>
-        <Text>Realizar Cadastro </Text>
+        <Text>Não possui conta? </Text>
         </TouchableOpacity>
       </HStack>
     

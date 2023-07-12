@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       ).fetch();
 
       if (users.length === 0 || users.length > 1) {
-        console.log('User not found');
+        Alert.alert('Usuário não encontrado');
         return;
       }
       const user : UserModel = users[0];
@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
           data.username = usuario;
           data.password = password;
           data.permissions = permissao;
-        }).then(data => { Alert.alert("Usuário cadastrado com sucesso!");return navigation.navigate('SignIn'); }).catch(err => { Alert.alert("Erro: " + err)});
+        }).then(data => { Alert.alert("Usuário cadastrado com sucesso, realize o login!");return navigation.navigate('SignIn'); }).catch(err => { Alert.alert("Erro: " + err)});
 
     });
 

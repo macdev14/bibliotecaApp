@@ -113,7 +113,7 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.bibliotecaapp"
+    namespace "com.macdev.bibliotecaApp"
     defaultConfig {
         applicationId 'com.macdev.bibliotecaApp'
         minSdkVersion rootProject.ext.minSdkVersion

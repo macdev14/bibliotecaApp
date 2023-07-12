@@ -1,23 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FlatList, Alert, TouchableOpacity, StyleSheet, Image, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { FlatList, Alert, StyleSheet } from "react-native";
 import { BookCard } from "../../components/BookCard";
 import { database } from "../../databases";
 import BookModel from "../../databases/models/bookModel";
-import BottomSheet, { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { Form, FormTitle, Container, Input } from "./styles";
-import { Ionicons, AntDesign } from '@expo/vector-icons';
-import { Text, Button, Icon, CheckIcon, Select } from "native-base";
+import BottomSheet from '@gorhom/bottom-sheet';
+import { Form, FormTitle, Container } from "./styles";
+import { Button, CheckIcon, Select } from "native-base";
 import { useAuth } from "../../context/auth";
-import { Q } from "@nozbe/watermelondb";
 import ReservationModel from "../../databases/models/reservationModel";
 import { useIsFocused } from "@react-navigation/native";
-import { fetchAvailableBooks, fetchAvailableBooksForUser, fetchAvailableBooksIncludeSelectedBook, fetchBooks, fetchUsers } from "../../services";
+import { fetchAvailableBooksForUser, fetchAvailableBooksIncludeSelectedBook, fetchUsers } from "../../services";
 import UserModel from "../../databases/models/userModel";
 
 export const AdminReservations = () => {
   const { user } = useAuth();
   const isFocused = useIsFocused();
-  
+
   const [reservations, setReservations] = useState<ReservationModel[]>([]);
   const [reservation, setReservation] = useState<ReservationModel>({} as ReservationModel);
   const [book, setBook] = useState<BookModel>({} as BookModel);
@@ -36,9 +34,7 @@ export const AdminReservations = () => {
       .fetch();
 
     setReservations(reservedBooks);
-    console.log("livros reservados id",reservedBooks)
-    // fetchBooks(setAllBooks);
-    // const reservedBookIds = reservedBooks.map(reservation => reservation.bookId);
+    
     fetchAvailableBooksIncludeSelectedBook(selectedBook, setAvailableBooks);
     fetchUsers(setAllUsers);
   }
@@ -69,6 +65,8 @@ export const AdminReservations = () => {
 
       }
       bottomSheetRef.current?.collapse();
+      setReservation({} as ReservationModel);
+      cleanAll();
       fetchData();
     }
     catch (error) {
@@ -77,9 +75,15 @@ export const AdminReservations = () => {
   }
 
   async function handleEdit(item: ReservationModel) {
+    setReservation(item);
+    console.log("Item: ", item);
     setSelectedBook(item.bookId);
     setSelectedUser(item.userId);
-    bottomSheetRef.current?.expand();
+    console.log("book id: ", item.bookId);
+    fetchAvailableBooksIncludeSelectedBook(item.bookId, setAvailableBooks).then(() => bottomSheetRef.current?.expand());
+
+
+
 
   }
 
@@ -92,7 +96,7 @@ export const AdminReservations = () => {
         })
 
     });
-    Alert.alert("Reserved!");
+    Alert.alert("Reservado!");
     fetchData();
   }
 
@@ -106,6 +110,14 @@ export const AdminReservations = () => {
     Alert.alert("Reserva Excluída!");
   }
 
+  const cleanAll = () => {
+    console.log("cleanAll");
+    setReservation({} as ReservationModel); 
+    setSelectedBook(''); 
+    setSelectedUser('');
+    setAvailableBooks([]);
+  }
+
   useEffect(() => {
     fetchData()
   }, [isFocused]);
@@ -116,10 +128,11 @@ export const AdminReservations = () => {
 
 
     <Container>
+
       <FlatList
         renderItem={({ item }) => <BookCard data={item} onEdit={() => { handleEdit(item) }}
           onRemove={() => handleRemove(item)}
-          onReserve={() => handleReserve(item)}
+        // onReserve={() => handleReserve(item)}
         />}
         data={reservations}
 
@@ -131,6 +144,7 @@ export const AdminReservations = () => {
         ref={bottomSheetRef}
         index={0}
         snapPoints={['4%', '65%']}
+        onChange={(e) => e == 0 && cleanAll()}
       >
         <Form>
           <FormTitle>{reservation.id ? 'Alterar' : 'Adicionar'}</FormTitle>
@@ -152,18 +166,13 @@ export const AdminReservations = () => {
 
               endIcon: <CheckIcon size="5" />
             }} mt={1}  >
-              
+
             {availableBooks.map((book) => <Select.Item label={book.name} value={book.id} key={book.id} />)}
 
           </Select>
 
+          <Button mb="5" colorScheme="success" onPress={handleSave} >Salvar</Button>
 
-
-
-
-
-
-          <Button colorScheme="success" onPress={handleSave} >Salvar</Button>
         </Form>
 
       </BottomSheet>

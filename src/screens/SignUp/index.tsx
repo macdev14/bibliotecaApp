@@ -1,100 +1,76 @@
 import React, { useState } from "react";
 import { Box, Center, Image, Heading, Input, FormControl, Select, VStack, Icon, Button, Checkbox, Text, HStack, WarningOutlineIcon, Slider, Switch, useColorMode, CheckIcon } from "native-base";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Alert } from "react-native";
+import { Alert, TouchableOpacity } from "react-native";
 import { useAuth } from "../../context/auth";
+import { useForm } from 'react-hook-form';
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup"
+import { ControlledInput } from "../../components/ControlledInput";
+import { useNavigation } from "@react-navigation/native";
+
+type FormData = {
+  username: string;
+  password: string;
+  password_confirm: string
+
+}
+const schema = yup.object({
+  username: yup.string().required("Informe o seu usuario"),
+  password: yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Informe a senha"),
+  password_confirm: yup.string().oneOf([yup.ref('password')], 'A senha de confirmação não confere.')
+})
+
 function SignUp() {
+  const navigation = useNavigation();
   const { signUp } = useAuth()
-  const { colorMode, toggleColorMode } = useColorMode();
-  const [usuario, setUsuario] = useState<string>();
-  const [senha, setSenha] = useState<string>();
-  const [confirmarSenha, setConfirmarSenha] = useState<string>();
   const [permissao, setPermissao] = React.useState<Permissao>("normal_user");
-  const handleSignUp = () => {
-    if (confirmarSenha != senha) {
-      return Alert.alert("Erro", "As senhas não conferem");
-    }
-    if (senha.length < 6) {
-      return Alert.alert("Erro", "A senha precisa ter no mínimo 6 caracteres");
-    }
-    signUp(usuario, senha, permissao);
-    return
 
+  const { control, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema)
+  })
 
+  const handleSignUp = (data) => {
+    signUp(data.username, data.password, permissao);
+    
   }
 
   return (
-    <Center height="full" _dark={{ bg: "black", }} _light={{ bg: "white" }}>
-
-      <VStack width={"full"} p="5">
-        <Box width="full" >
-          <Heading color={"coolGray.700"}
-            _dark={{ color: "white" }}
-            _light={{ color: "black" }}
-          >
+    <Center height="full" _light={{ bg: "white" }}>
+       
+       <Heading color={"coolGray.700"} mb="10" >
             Realizar Cadastro
           </Heading>
+      <VStack width={"full"} p="5">
+        <Box width="full" >
+         
 
-          <FormControl>
-            <FormControl.Label>Usuário</FormControl.Label>
-            <Input placeholder="seu usuario"
-              onChangeText={setUsuario}
+          <ControlledInput
+            control={control}
+            name="username"
+            icon="lock"
+            placeholder="Usuario"
+            
+            error={errors.username}
+          />
 
-              InputLeftElement={
-                <Icon as={<MaterialIcons name="person" />}
-                  size={5}
-                  ml={2}
-                  color="muted.400"
-                />
-              }
-            />
-               <FormControl.ErrorMessage
-              leftIcon={<WarningOutlineIcon size="xs" />}
-            >
-              Usuário inválido
-            </FormControl.ErrorMessage>
-          </FormControl>
-          <FormControl>
-            <FormControl.Label>Senha</FormControl.Label>
-            <Input placeholder="sua senha"
-              onChangeText={setSenha}
-              secureTextEntry
-              InputLeftElement={
-                <Icon as={<MaterialIcons name="lock" />}
-                  size={5}
-                  ml={2}
-                  color="muted.400"
-                />
-              }
+          <ControlledInput
+            control={control}
+            name="password"
+            icon="lock"
+            placeholder="Senha"
+            secureTextEntry
+            error={errors.password}
+          />
 
-            />
-            <FormControl.ErrorMessage
-              leftIcon={<WarningOutlineIcon size="xs" />}
-            >
-              Senha inválida
-            </FormControl.ErrorMessage>
-          </FormControl>
-
-          <FormControl>
-            <FormControl.Label>Confirmar Senha</FormControl.Label>
-            <Input placeholder=" senha"
-              onChangeText={setConfirmarSenha}
-              secureTextEntry
-              InputLeftElement={
-                <Icon as={<MaterialIcons name="lock" />}
-                  size={5}
-                  ml={2}
-                  color="muted.400"
-                />
-              }
-
-            />
-            <FormControl.ErrorMessage
-              leftIcon={<WarningOutlineIcon size="xs" />}
-            >
-              Erro ao confirmar senha
-            </FormControl.ErrorMessage>
-          </FormControl>
+          <ControlledInput
+            control={control}
+            name="password_confirm"
+            icon="lock"
+            placeholder="Confirme sua Senha"
+            secureTextEntry
+            error={errors.password_confirm}
+          />
 
           <FormControl isRequired marginTop={5}>
             <Select selectedValue={permissao} minWidth="200" accessibilityLabel="Choose Service" placeholder="Choose Service" _selectedItem={{
@@ -112,13 +88,17 @@ function SignUp() {
 
 
           <Button mt={12} colorScheme={"purple"}
-            onPress={handleSignUp}
-          >Cadastrar</Button>
+            onPress={handleSubmit(handleSignUp)}
+          >Cadastrar-se</Button>
 
         </Box>
 
       </VStack>
-
+      <HStack alignItems="center" space={4}>
+        <TouchableOpacity onPress={()=>navigation.navigate('SignIn')}>
+        <Text>Possui conta? </Text>
+        </TouchableOpacity>
+      </HStack>
 
     </Center>)
 }

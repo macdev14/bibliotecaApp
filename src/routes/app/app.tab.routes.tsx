@@ -30,7 +30,7 @@ export function TabRoutes() {
             <Screen name="ReservationStackRoutes" component={ReservationStackRoutes} 
            options={
             {
-                tabBarLabel: "Livros Reservados",
+                tabBarLabel: "Minhas Reservas",
                 tabBarIcon: ({color}) => (
                     <MaterialIcons name="bookmark" color={color} size={25} />
                                     )

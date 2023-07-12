@@ -13,7 +13,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { fetchBooksInReservationFromUserId } from "../../services";
 
 export const Reservations = () => {
-  const {user} = useAuth();
+  const { user } = useAuth();
   const isFocused = useIsFocused();
   const [books, setBooks] = useState([]);
   const [book, setBook] = useState<BookModel>({} as BookModel);
@@ -24,7 +24,7 @@ export const Reservations = () => {
 
 
 
-  
+
   useEffect(() => {
     fetchBooksInReservationFromUserId(user.id, setBooks);
   }, [isFocused]);
@@ -32,28 +32,28 @@ export const Reservations = () => {
   async function removeReserve(item: BookModel) {
     await database.write(async () => {
       await database.get<ReservationModel>('reservations')
-      .query(Q.where('book_id', item.id)).destroyAllPermanently();
-     });
-     await fetchBooksInReservationFromUserId(user.id, setBooks);
-   
+        .query(Q.where('book_id', item.id)).destroyAllPermanently();
+    });
+    await fetchBooksInReservationFromUserId(user.id, setBooks);
+
   }
-   
+
   return (
-  
 
-  <Container>
-  <FlatList
-  renderItem={({item})=><BookCard data={item} 
-  onRemoveReserve={() => removeReserve(item)}
 
-  />}
-  data={books}
-  
-  /> 
-   
-        
-      
- {/* <BottomSheet
+    <Container>
+      <FlatList
+        renderItem={({ item }) => <BookCard data={item}
+          onRemoveReserve={() => removeReserve(item)}
+
+        />}
+        data={books}
+
+      />
+
+
+
+      {/* <BottomSheet
         ref={bottomSheetRef}
         index={0}
         snapPoints={['4%', '65%']}
@@ -65,15 +65,15 @@ export const Reservations = () => {
 
        
       </BottomSheet> */}
-       
-      </Container>
+
+    </Container>
   )
-  
+
 };
 
 const styles = StyleSheet.create({
 
-  antDesign:{
+  antDesign: {
     justifyContent: 'center',
     textAlign: "center",
     alignSelf: "stretch",
