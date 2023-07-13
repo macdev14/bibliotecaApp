@@ -18,15 +18,14 @@ export const AdminReservations = () => {
 
   const [reservations, setReservations] = useState<ReservationModel[]>([]);
   const [reservation, setReservation] = useState<ReservationModel>({} as ReservationModel);
-  const [book, setBook] = useState<BookModel>({} as BookModel);
-  const [allBooks, setAllBooks] = useState<BookModel[]>([]);
+
   const [availableBooks, setAvailableBooks] = useState<BookModel[]>([] as BookModel[]);
   const [allUsers, setAllUsers] = useState<UserModel[]>([] as UserModel[]);
 
   const [selectedBook, setSelectedBook] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetRef = useRef<BottomSheet>({} as BottomSheet);
   async function fetchData() {
     const reservedBooks = await database.collections
       .get<ReservationModel>('reservations')
@@ -76,10 +75,10 @@ export const AdminReservations = () => {
 
   async function handleEdit(item: ReservationModel) {
     setReservation(item);
-    console.log("Item: ", item);
+   
     setSelectedBook(item.bookId);
     setSelectedUser(item.userId);
-    console.log("book id: ", item.bookId);
+   
     fetchAvailableBooksIncludeSelectedBook(item.bookId, setAvailableBooks).then(() => bottomSheetRef.current?.expand());
 
 
@@ -130,8 +129,9 @@ export const AdminReservations = () => {
     <Container>
 
       <FlatList
-        renderItem={({ item }) => <BookCard data={item} onEdit={() => { handleEdit(item) }}
-          onRemove={() => handleRemove(item)}
+        renderItem={({ item }) => <BookCard data={item} 
+        onEdit={() => handleEdit(item)  }
+        onRemove={() => handleRemove(item)}
         // onReserve={() => handleReserve(item)}
         />}
         data={reservations}

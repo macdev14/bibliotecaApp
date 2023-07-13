@@ -9,7 +9,7 @@ interface User {
 
   interface AuthContextData {
     signed: boolean;
-    user: User | null;
+    user: User;
     loading: boolean;
     signIn(name:string, password:string): void;
     signOut(): void;

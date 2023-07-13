@@ -14,25 +14,52 @@ import { BottomSheetControlledInput } from "../../components/BottomSheetControll
 import { useForm } from 'react-hook-form';
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup"
+import { ISchema } from "yup";
 
 type FormData = {
   username: string;
   password: string;
-  password_confirm: string
+  password_confirm: string;
 
 }
-const schema = yup.object().shape({
-  username: yup.string().required("Informe o seu usuario"),
-  password: yup.string().min(6, "A senha deve ter ao menos 6 dígitos"),
-  password_confirm: yup.string().when('password')
 
-})
+let schema =
+  yup.object({
+    username: yup.string().required("Informe o seu usuario"),
+    password: yup.string().when('_', {
+      is: (val: string) => val && val.length > 0,
+      then: () => yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Informe a senha"),
+
+    }),
+    password_confirm: yup.string().when('password', {
+      is: (val: string) => val && val.length > 0,
+      then: () => yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Confirme a senha"),
+
+    }),
+  });
+
+
+let rootValue = {
+  foo: [{ bar: 1 }, { bar: 1, loose: true }],
+};
+
+
+
+// const schema = yup.object({
+//   // username: yup.string().required("Informe o seu usuario"),
+//   password: yup.string().min(6, "A senha deve ter ao menos 6 dígitos"),
+//   password_confirm: yup.string().when('password', {
+//     is: true,
+//     otherwise: yup.string()
+//   } )
+
+// })
 
 
 export const Users = () => {
   const { user, signOut } = useAuth();
   const isFocused = useIsFocused();
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<UserModel[]>([]);
   const [focusedUser, setFocusedUser] = useState<UserModel>({} as UserModel);
   // const [username, setUsername] = useState('');
   // const [password, setPassword] = useState('');
@@ -55,25 +82,25 @@ export const Users = () => {
     {
       text: 'Cancelar',
       onPress: () => '',
-  
+
     },
     { text: 'Confirmar', style: 'cancel', onPress: () => handleSaveWithSignOut() },
   ]
 
 
-  const handleSaveWithSignOut = ()=>{
+  const handleSaveWithSignOut = () => {
     handleSubmit(handleSave)();
     signOut();
   }
 
   const handleUserSave = () => {
     console.log("Called")
-    const accessLevelChanged = ()=> Alert.alert("Mudança de Nível de Acesso",
-    "Será necessário fazer login novamente ao alterar o nível de acesso.", opcoes)
-     if(focusedUser.permissions !== permission && user.id === focusedUser.id){
-       return accessLevelChanged()
-     }
-     return handleSubmit(handleSave)(); ;
+    const accessLevelChanged = () => Alert.alert("Mudança de Nível de Acesso",
+      "Será necessário fazer login novamente ao alterar o nível de acesso.", opcoes)
+    if (focusedUser.permissions !== permission && user.id === focusedUser.id) {
+      return accessLevelChanged()
+    }
+    return handleSubmit(handleSave)();;
   }
 
 
@@ -105,13 +132,13 @@ export const Users = () => {
           })
         }).then(() => Alert.alert("Atualizado!"))
       } else {
-        console.log("Permission:", permission);
+
         const pw = data.password.length > 0 ? await hashPassword(data.password) : null
         await database.write(async () => {
           await database.get<UserModel>('users')
             .create(dbData => {
               dbData.username = data.username;
-              dbData.password = pw;
+              pw != null ? dbData.password = pw : '';
               dbData.permissions = permission;
             })
 
@@ -130,7 +157,7 @@ export const Users = () => {
   async function handleEdit(item: UserModel) {
     setFocusedUser(item);
     setValue('username', item.username);
- 
+
     setPermission(item.permissions);
     bottomSheetRef.current?.expand();
 
@@ -176,7 +203,7 @@ export const Users = () => {
 
     <Container>
       <FlatList
-        renderItem={({ item }) => <BookCard data={item} onEdit={() => { handleEdit(item) }}
+        renderItem={({ item }) => <BookCard data={item} onEdit={() => handleEdit(item)}
           onRemove={() => handleRemove(item)}
         />}
         data={users}
@@ -221,7 +248,7 @@ export const Users = () => {
             secureTextEntry
             error={errors.password}
             control={control}
-            
+
           />
 
           <BottomSheetControlledInput
@@ -233,7 +260,7 @@ export const Users = () => {
             control={control}
           />
 
-          <Button colorScheme="success" onPress={()=>handleUserSave()} >Salvar</Button>
+          <Button colorScheme="success" onPress={() => handleUserSave()} >Salvar</Button>
         </Form>
 
       </BottomSheet>

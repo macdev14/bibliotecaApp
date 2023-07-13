@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { SetStateAction, useEffect, useRef, useState } from "react";
 import { FlatList, Alert, StyleSheet } from "react-native";
 import { BookCard } from "../../components/BookCard";
 import { database } from "../../databases";
@@ -25,9 +25,9 @@ type bookDataProps = {
 export const Books = () => {
   const { user } = useAuth();
   const isFocused = useIsFocused();
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState<BookModel[]>([]);
   const [book, setBook] = useState<BookModel>({} as BookModel);
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetRef = useRef<BottomSheet>({} as BottomSheet);
 
   const schema = yup.object({
     name: yup.string().required("Informe o nome do livro"),
@@ -56,7 +56,7 @@ export const Books = () => {
 
     const availableBooks = allBooks.filter(book => !reservedBookIds.includes(book.id));
 
-    setBooks(availableBooks);
+    setBooks(availableBooks as SetStateAction<never[]>);
 
   }
 
@@ -150,25 +150,20 @@ export const Books = () => {
     fetchData()
   }, [isFocused]);
 
-
-
-  console.log(book)
-
   return (
 
 
     <Container>
       <FlatList
-        renderItem={({ item }) => <BookCard data={item} onEdit={() => { handleEdit(item) }}
-          onRemove={() => handleRemove(item)}
-          onReserve={() => handleReserve(item)}
-        />}
-        data={books}
+        renderItem={({ item }) => (
+        <BookCard data={item} onEdit={()=>handleEdit(item)}
+          onRemove={()=>handleRemove(item)}
+          onReserve={()=>handleReserve(item)}
+        />
+  )}
+        data={books }
 
       />
-
-
-
       <BottomSheet
         onChange={(e) => e == 0 && cleanAll()}
         ref={bottomSheetRef}

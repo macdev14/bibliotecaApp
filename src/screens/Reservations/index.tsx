@@ -20,7 +20,7 @@ export const Reservations = () => {
   const [name, setName] = useState('');
   const [author, setAuthor] = useState('');
   const [uri, setUri] = useState('');
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetRef = useRef<BottomSheet>({} as BottomSheet);
 
 
 

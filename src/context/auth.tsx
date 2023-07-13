@@ -13,11 +13,9 @@ import UserModel from '../databases/models/userModel';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
-
 const AuthContext = createContext({} as AuthContextData);
 export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>({} as User);
   const [loading, setLoading] = useState<boolean>(true);
   const navigation = useNavigation();
   useEffect(() => {
@@ -65,7 +63,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
   function signOut() {
     AsyncStorage.clear().then(() => {
-      setUser(null);
+      setUser({} as User);
     });
   }
 

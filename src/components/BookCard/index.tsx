@@ -1,36 +1,58 @@
 import React, { useEffect, useState } from "react";
 import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Container, Icon, Name, Options, Option } from "./styles";
-import { Image } from "react-native";
+import { GestureResponderEvent, Image } from "react-native";
 import { useAuth } from "../../context/auth";
 import UserModel from "../../databases/models/userModel";
 import BookModel from "../../databases/models/bookModel";
 import { fetchBook, fetchUser } from "../../services";
-export const BookCard = ({ data, onEdit = null, onRemove = null, onReserve = null, onRemoveReserve = null }) => {
+import ReservationModel from "../../databases/models/reservationModel";
+
+interface BookCardProps {
+  data : BookModel | ReservationModel | UserModel;
+  onEdit? :  undefined | (()=>Promise<void>) ;
+  onRemove? :  undefined | (()=>Promise<void>);
+  onReserve? :   undefined | (()=>Promise<void>);
+  onRemoveReserve? :  undefined | (()=>Promise<void>);
+}
+
+
+export const BookCard = ({ data, onEdit=undefined, onRemove=undefined, onReserve=undefined, onRemoveReserve=undefined } : BookCardProps) => {
   const { user } = useAuth();
   const [userObject, setUserObject] = useState({} as UserModel);
   const [bookObject, setBookObject] = useState({} as BookModel);
-  const { name, author, bookId, uri, userId, username, permissions } = data;
+  // const { name, author, bookId, uri, userId, username, permissions } = data;
+  const isReservation = data instanceof ReservationModel;
+  const isBook = data instanceof BookModel;
+  const isUser = data instanceof UserModel;
+
+
   useEffect(() => {
-    userId && fetchUser(userId as string, setUserObject)
-    bookId && fetchBook(bookId as string, setBookObject)
-  }, [userId, bookId]);
+    if(isReservation){
+      data.userId && fetchUser(data.userId as string, setUserObject)
+      data.bookId && fetchBook(data.bookId as string, setBookObject)
+    }
+
+    if(isBook){
+      data.userId && fetchUser(data.userId as string, setUserObject)
+    }
+  }, [[isBook && data.userId], [isReservation && data.bookId]  ]);
 
 
   return (
     <Container>
-      <Icon type={data.type}>
-        {((bookObject && bookObject.uri) || uri) ? <Image source={{ uri: (uri || bookObject && bookObject.uri) }} alt="image base" style={{ width: "100%", height: "100%" }} /> :
+      <Icon type=''>
+        {(bookObject.uri || isBook) ? <Image source={{ uri: (isBook && data.uri || bookObject && bookObject.uri) }} alt="image base" style={{ width: "100%", height: "100%" }} /> :
           <AntDesign name="user" size={25} color="black" />
         }
       </Icon>
 
-      <Name>{name || username || bookObject && bookObject.name}</Name>
-      <Name>{author || bookObject && bookObject.author ? `Autor: ${author || bookObject && bookObject.author}` : ''} {permissions ? `Nível de Acesso ${permissions == 'normal_user' ? 'Usuário Normal' : 'Administrador'}` : ''}</Name>
-      {data.reservationDate && userObject ? <Name>Reservado por: {userObject.username} em {data.reservationDate || ''}</Name> : ''}
+      <Name>{isBook && data.name || isUser && data.username || bookObject && bookObject.name}</Name>
+      <Name>{ isBook && data.author || bookObject && bookObject.author ? `Autor: ${isBook && data.author || bookObject && bookObject.author}` : ''} { isUser ? `Nível de Acesso ${data.permissions == 'normal_user' ? 'Usuário Normal' : 'Administrador'}` : ''}</Name>
+      { isReservation && data.reservationDate && userObject ? <Name>Reservado por: {userObject.username} em {data.reservationDate || ''}</Name> : ''}
 
       <Options>
-        {((onEdit !== null && userId == user.id) || user.permissions == 'super_user') &&
+        { (onEdit !== null && onEdit !== undefined && (isBook || isReservation) && (data.userId == user.id || user.permissions == 'super_user')) &&
           <Option onPress={onEdit}>
             <Entypo
               name="edit"
@@ -38,7 +60,7 @@ export const BookCard = ({ data, onEdit = null, onRemove = null, onReserve = nul
               size={20}
             />
           </Option>}
-        {((onRemove !== null && userObject.id == user.id) || user.permissions == 'super_user' )  &&
+        {((onRemove !== null && onRemove !== undefined && userObject.id == user.id) || user.permissions == 'super_user' )  &&
           <Option onPress={onRemove}>
             <Entypo
               name="trash"
@@ -48,7 +70,7 @@ export const BookCard = ({ data, onEdit = null, onRemove = null, onReserve = nul
           </Option>
         }
         {
-          onReserve !== null ?
+          onReserve !== null && onReserve !== undefined ?
             <Option onPress={onReserve}>
               <Entypo
                 name="check"
@@ -59,7 +81,7 @@ export const BookCard = ({ data, onEdit = null, onRemove = null, onReserve = nul
         }
 
         {
-          onRemoveReserve !== null ?
+            onRemoveReserve !== null && onRemoveReserve !== undefined ?
             <Option onPress={onRemoveReserve}>
               <Entypo
                 name="circle-with-cross"

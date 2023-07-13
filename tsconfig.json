@@ -1,4 +1,7 @@
 {
-  "compilerOptions": {},
+  "compilerOptions": {
+    "strictNullChecks" : true,
+    "strictFunctionTypes": false
+  },
   "extends": "expo/tsconfig.base"
 }
