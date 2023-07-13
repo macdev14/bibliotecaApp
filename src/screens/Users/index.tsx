@@ -10,8 +10,23 @@ import { useIsFocused } from "@react-navigation/native";
 import UserModel from "../../databases/models/userModel";
 import { hashPassword } from "../../utils/crypto";
 import { fetchUsers, deleteUser } from "../../services";
+import { BottomSheetControlledInput } from "../../components/BottomSheetControlledInput";
+import { useForm } from 'react-hook-form';
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup"
 
+type FormData = {
+  username: string;
+  password: string;
+  password_confirm: string
 
+}
+const schema = yup.object().shape({
+  username: yup.string().required("Informe o seu usuario"),
+  password: yup.string().min(6, "A senha deve ter ao menos 6 dígitos"),
+  password_confirm: yup.string().when('password')
+
+})
 
 
 export const Users = () => {
@@ -19,16 +34,20 @@ export const Users = () => {
   const isFocused = useIsFocused();
   const [users, setUsers] = useState([]);
   const [focusedUser, setFocusedUser] = useState<UserModel>({} as UserModel);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  // const [username, setUsername] = useState('');
+  // const [password, setPassword] = useState('');
   const [permission, setPermission] = useState<Permissao>('normal_user');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  // const [confirmPassword, setConfirmPassword] = useState('');
   const bottomSheetRef = useRef<BottomSheet>(null);
 
+  const { setValue, control, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema)
+  })
+
   const cleanAll = () => {
-    setPassword('');
-    setConfirmPassword('');
-    setUsername('');
+    setValue('password', '');
+    setValue('password_confirm', '');
+    setValue('username', '');
     setPermission('normal_user');
     setFocusedUser({} as UserModel);
   }
@@ -36,21 +55,26 @@ export const Users = () => {
     {
       text: 'Cancelar',
       onPress: () => '',
-
+  
     },
-    { text: 'Confirmar', style: 'cancel', onPress: () => handleSave().then(() => signOut()) },
+    { text: 'Confirmar', style: 'cancel', onPress: () => handleSaveWithSignOut() },
   ]
 
 
-
-
-  const handleUserSave = () => {
-    focusedUser.permissions !== permission && user.id === focusedUser.id ? Alert.alert("Mudança de Nível de Acesso",
-      "Será necessário fazer login novamente ao alterar o nível de acesso.",
-      opcoes
-    ) : handleSave();
+  const handleSaveWithSignOut = ()=>{
+    handleSubmit(handleSave)();
+    signOut();
   }
 
+  const handleUserSave = () => {
+    console.log("Called")
+    const accessLevelChanged = ()=> Alert.alert("Mudança de Nível de Acesso",
+    "Será necessário fazer login novamente ao alterar o nível de acesso.", opcoes)
+     if(focusedUser.permissions !== permission && user.id === focusedUser.id){
+       return accessLevelChanged()
+     }
+     return handleSubmit(handleSave)(); ;
+  }
 
 
   async function fetchData() {
@@ -58,13 +82,14 @@ export const Users = () => {
   }
 
 
-  async function handleSave() {
+  async function handleSave(data: FormData) {
+    console.log('called', data);
     try {
-      if (password) {
-        if (password.length < 6) {
+      if (data.password) {
+        if (data.password.length < 6) {
           return Alert.alert("Erro", "A senha precisa ter no mínimo 6 caracteres");
         }
-        if (confirmPassword != password) {
+        if (data.password_confirm != data.password) {
           Alert.alert("Erro", "As senhas não são iguais");
           return;
         }
@@ -72,29 +97,25 @@ export const Users = () => {
       if (focusedUser.id) {
 
         await database.write(async () => {
-
-          const pw = password.length > 0 ? await hashPassword(password) : null
-          await focusedUser.update(data => {
-            data.username = username;
-            pw !== null ? data.password = pw : '';
-            data.permissions = permission;
-
+          const pw = data.password.length > 0 ? await hashPassword(data.password) : null
+          await focusedUser.update(dbData => {
+            dbData.username = data.username;
+            pw !== null ? dbData.password = pw : '';
+            dbData.permissions = permission;
           })
         }).then(() => Alert.alert("Atualizado!"))
       } else {
         console.log("Permission:", permission);
-        const pw = password.length > 0 ? await hashPassword(password) : null
+        const pw = data.password.length > 0 ? await hashPassword(data.password) : null
         await database.write(async () => {
           await database.get<UserModel>('users')
-            .create(data => {
-              data.username = username;
-              data.password = pw;
-              data.permissions = permission;
+            .create(dbData => {
+              dbData.username = data.username;
+              dbData.password = pw;
+              dbData.permissions = permission;
             })
 
         }).then(() => Alert.alert("Adicionado!")).catch((e) => Alert.alert(e.message));
-
-
 
       }
       cleanAll();
@@ -108,7 +129,8 @@ export const Users = () => {
 
   async function handleEdit(item: UserModel) {
     setFocusedUser(item);
-    setUsername(item.username);
+    setValue('username', item.username);
+ 
     setPermission(item.permissions);
     bottomSheetRef.current?.expand();
 
@@ -173,12 +195,12 @@ export const Users = () => {
         <Form>
           <FormTitle>{focusedUser.username ? 'Alterar' : 'Adicionar'}</FormTitle>
 
-          <BottomSheetTextInput
-
+          <BottomSheetControlledInput
+            name="username"
             style={styles.textInput}
             placeholder="Usuário"
-            onChangeText={setUsername}
-            value={username}
+            error={errors.username}
+            control={control}
           />
 
 
@@ -192,23 +214,26 @@ export const Users = () => {
           </Select>
 
 
-          <BottomSheetTextInput
+          <BottomSheetControlledInput
             style={styles.textInput}
             placeholder="Nova Senha"
-            onChangeText={setPassword}
+            name="password"
             secureTextEntry
-            value={password}
+            error={errors.password}
+            control={control}
+            
           />
 
-          <BottomSheetTextInput
+          <BottomSheetControlledInput
             secureTextEntry
             style={styles.textInput}
             placeholder="Confirmar nova senha"
-            onChangeText={setConfirmPassword}
-            value={confirmPassword}
+            name="password_confirm"
+            error={errors.password_confirm}
+            control={control}
           />
 
-          <Button colorScheme="success" onPress={handleUserSave} >Salvar</Button>
+          <Button colorScheme="success" onPress={()=>handleUserSave()} >Salvar</Button>
         </Form>
 
       </BottomSheet>

@@ -8,19 +8,38 @@ import { Form, FormTitle, Container } from "./styles";
 
 import { Button } from "native-base";
 import { useAuth } from "../../context/auth";
+import { useForm } from 'react-hook-form';
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { Q } from "@nozbe/watermelondb";
 import ReservationModel from "../../databases/models/reservationModel";
 import { useIsFocused } from "@react-navigation/native";
+import { BottomSheetControlledInput } from "../../components/BottomSheetControlledInput";
+
+type bookDataProps = {
+  author: string,
+  name: string,
+  uri: string,
+}
 
 export const Books = () => {
   const { user } = useAuth();
   const isFocused = useIsFocused();
   const [books, setBooks] = useState([]);
   const [book, setBook] = useState<BookModel>({} as BookModel);
-  const [name, setName] = useState('');
-  const [author, setAuthor] = useState('');
-  const [uri, setUri] = useState('');
   const bottomSheetRef = useRef<BottomSheet>(null);
+
+  const schema = yup.object({
+    name: yup.string().required("Informe o nome do livro"),
+    author: yup.string().required("Informe o autor do livro"),
+    uri: yup.string().required("Informe o link da imagem do livro").url('Link inválido'),
+  });
+
+  const { setValue, control, handleSubmit, formState : {errors}} =  useForm({
+    resolver: yupResolver(schema)
+  })
+
+
   async function fetchData() {
 
     const reservedBooks = await database.collections
@@ -41,34 +60,35 @@ export const Books = () => {
 
   }
 
-  async function handleSave() {
+  async function handleSave(bookData: bookDataProps) {
     try {
       if (book.id) {
         await database.write(async () => {
           await book.update(data => {
-            data.name = name;
-            data.author = author;
-            data.uri = uri;
+            data.name = bookData.name;
+            data.author = bookData.author;
+            data.uri = bookData.uri;
           })
         })
+        Alert.alert("Alterado!");
       } else {
 
         await database.write(async () => {
           await database.get<BookModel>('books')
             .create(data => {
-              data.name = name;
-              data.author = author;
-              data.uri = uri;
+              data.name = bookData.name;
+              data.author = bookData.author;
+              data.uri = bookData.uri;
               data.users.id = user.id
             })
 
         });
-
+        Alert.alert("Adicionado!");
 
       }
       bottomSheetRef.current?.collapse();
       cleanAll();
-      Alert.alert("Adicionado!");
+      
       fetchData();
     }
     catch (error) {
@@ -78,19 +98,19 @@ export const Books = () => {
   }
 
   const cleanAll = () => {
-    setName("");
+  
     setBook({} as BookModel);
-    setUri("");
-    setAuthor("");
+    setValue('name','');
+    setValue('uri','');
+    setValue('author','');
   }
 
   async function handleEdit(item: BookModel) {
-    setName(item.name);
     setBook(item);
-    setUri(item.uri);
-    setAuthor(item.author);
+    setValue('name', item.name);
+    setValue('author', item.author);
+    setValue('uri', item.uri);
     bottomSheetRef.current?.expand();
-
   }
 
   async function handleReserve(item: BookModel) {
@@ -130,6 +150,8 @@ export const Books = () => {
     fetchData()
   }, [isFocused]);
 
+
+
   console.log(book)
 
   return (
@@ -150,38 +172,42 @@ export const Books = () => {
       <BottomSheet
         onChange={(e) => e == 0 && cleanAll()}
         ref={bottomSheetRef}
-        index={0}
-        snapPoints={['4%', '65%']}
+        index={1}
+        snapPoints={['5%', '65%']}
       >
         <Form>
           <FormTitle>{book.name ? 'Alterar' : 'Adicionar'}</FormTitle>
 
-          <BottomSheetTextInput
+          <BottomSheetControlledInput
+            control={control}
             style={styles.textInput}
             placeholder="Título"
-            onChangeText={setName}
-            value={name}
+            name="name"
+            error={errors.name}
           />
 
-          <BottomSheetTextInput
+          <BottomSheetControlledInput
+            control={control}
             style={styles.textInput}
             placeholder="Autor"
-            onChangeText={setAuthor}
-            value={author}
+            name="author"
+            error={errors.author}
+            
           />
 
-          <BottomSheetTextInput
+          <BottomSheetControlledInput
+            control={control}
             style={styles.textInput}
             placeholder="Link da capa do livro"
-            onChangeText={setUri}
-            value={uri}
+            name="uri"
+            error={errors.uri}
           />
 
 
 
 
 
-          <Button colorScheme="success" onPress={handleSave} >Salvar</Button>
+          <Button colorScheme="success" onPress={handleSubmit(handleSave)} >Salvar</Button>
         </Form>
 
       </BottomSheet>
