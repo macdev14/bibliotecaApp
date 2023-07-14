@@ -49,7 +49,6 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
     
       const valid = await verifyPassword(password, user.password)
       if (valid) {
-       
         await AsyncStorage.setItem('@RNAuth:user', JSON.stringify({ username, permissions, id }));
         setUser({ username, permissions, id } as User);
       } else {

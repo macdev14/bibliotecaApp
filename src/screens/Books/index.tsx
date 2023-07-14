@@ -36,7 +36,8 @@ export const Books = () => {
   });
 
   const { setValue, control, handleSubmit, formState : {errors}} =  useForm({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
+    mode: 'all'
   })
 
 

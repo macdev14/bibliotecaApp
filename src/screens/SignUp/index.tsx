@@ -18,7 +18,7 @@ type FormData = {
 const schema = yup.object({
   username: yup.string().required("Informe o seu usuario"),
   password: yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Informe a senha"),
-  password_confirm: yup.string().oneOf([yup.ref('password')], 'A senha de confirmação não confere.')
+  password_confirm: yup.string().oneOf([yup.ref('password')], 'A senha de confirmação não confere.').required("Informe a senha de confirmação")
 })
 
 function SignUp() {

@@ -40,6 +40,9 @@ export const AdminReservations = () => {
 
   async function handleSave() {
     try {
+      if(selectedUser === "") return Alert.alert("Favor selecionar um usuário");
+      if(selectedBook === "") return Alert.alert("Favor selecionar um Livro");
+      
       if (reservation.id) {
         await database.write(async () => {
           await reservation.update(data => {

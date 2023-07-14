@@ -24,7 +24,8 @@ const schema = yup.object({
 function SignIn() {
 
   const { control, handleSubmit, formState : {errors}} =  useForm({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
+    mode: 'all'
   })
 
   const { signIn } = useAuth()

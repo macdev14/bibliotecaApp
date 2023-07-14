@@ -25,19 +25,19 @@ type FormData = {
 }
 
 let schema =
-  yup.object({
+  yup.object().shape({
     username: yup.string().required("Informe o seu usuario"),
-    password: yup.string().when('_', {
+    password: yup.string().default("").when('password', {
       is: (val: string) => val && val.length > 0,
       then: () => yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Informe a senha"),
-      otherwise: () => yup.string()
+      otherwise: () => yup.string().notRequired()
     }),
     password_confirm: yup.string().when('password', {
       is: (val: string) => val && val.length > 0,
-      then: () => yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Confirme a senha"),
-      otherwise: () => yup.string()
+      then: () => yup.string().oneOf([yup.ref('password')], 'A senha de confirmação não confere.').required("Informe a senha de confirmação."),
+      otherwise: () => yup.string().notRequired()
     })
-  });
+  }, [['password', 'password']]);
 
 
 
@@ -53,7 +53,8 @@ export const Users = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const { setValue, control, handleSubmit, formState: { errors } } = useForm({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
+    mode: 'all'
   })
 
   const cleanAll = () => {
@@ -241,8 +242,6 @@ export const Users = () => {
             name="password"
             secureTextEntry
             error={errors.password}
-            
-
           />
 
           <BottomSheetControlledInput
