@@ -5,6 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { Error } from "./styles";
 import { Text } from "react-native";
 import { InputControllerProps } from "../../@types/inputController";
+import isEmpty from "../../utils/typeCheck";
 
 
 export function ControlledInput({ control, name, icon, error, ...rest }: InputControllerProps) {
@@ -19,7 +20,7 @@ export function ControlledInput({ control, name, icon, error, ...rest }: InputCo
         }
     />
     {
-        error && <Error>{error.message}</Error>
+        !isEmpty(error || {}) && <Error>{error.message}</Error>
     }
     </>
 }

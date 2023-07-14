@@ -27,7 +27,8 @@ function SignUp() {
   const [permissao, setPermissao] = React.useState<Permissao>("normal_user");
 
   const { control, handleSubmit, formState: { errors } } = useForm({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(schema),
+    mode: 'all'
   })
 
   const handleSignUp = (data : FormData) => {
@@ -46,11 +47,11 @@ function SignUp() {
 
           <ControlledInput
             control={control}
+            error={errors.username}
             name="username"
-            icon="lock"
+            icon="user"
             placeholder="Usuario"
             
-            error={errors.username}
           />
 
           <ControlledInput

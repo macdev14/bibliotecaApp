@@ -165,8 +165,6 @@ export const deleteReservationBookId = async (bookId: string) =>
         .query(Q.where('book_id', bookId)).destroyAllPermanently()
 
 
-
-
 export const deleteUser = async (userId: string) => {
     
     const allBooks = await database.collections

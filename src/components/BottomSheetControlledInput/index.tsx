@@ -3,7 +3,6 @@ import { InputControllerProps } from "../../@types/inputController";
 import { Controller } from "react-hook-form";
 import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import { Error } from "./styles";
-import {StyleSheet} from "react-native";
 export const BottomSheetControlledInput = ({ control, name, error, ...rest }: InputControllerProps) => {
     return <>
     <Controller name={name}
