@@ -15,6 +15,7 @@ import { useForm } from 'react-hook-form';
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup"
 import { ISchema } from "yup";
+import { Q } from "@nozbe/watermelondb";
 
 type FormData = {
   username: string;
@@ -29,31 +30,15 @@ let schema =
     password: yup.string().when('_', {
       is: (val: string) => val && val.length > 0,
       then: () => yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Informe a senha"),
-
+      otherwise: () => yup.string()
     }),
     password_confirm: yup.string().when('password', {
       is: (val: string) => val && val.length > 0,
       then: () => yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Confirme a senha"),
-
-    }),
+      otherwise: () => yup.string()
+    })
   });
 
-
-let rootValue = {
-  foo: [{ bar: 1 }, { bar: 1, loose: true }],
-};
-
-
-
-// const schema = yup.object({
-//   // username: yup.string().required("Informe o seu usuario"),
-//   password: yup.string().min(6, "A senha deve ter ao menos 6 dígitos"),
-//   password_confirm: yup.string().when('password', {
-//     is: true,
-//     otherwise: yup.string()
-//   } )
-
-// })
 
 
 export const Users = () => {
@@ -120,6 +105,7 @@ export const Users = () => {
           Alert.alert("Erro", "As senhas não são iguais");
           return;
         }
+        
       }
       if (focusedUser.id) {
 
@@ -132,7 +118,14 @@ export const Users = () => {
           })
         }).then(() => Alert.alert("Atualizado!"))
       } else {
-
+        const userCollection = database.get<UserModel>('users');
+        let user = await userCollection.query(
+          Q.where('username', data.username)
+        ).fetch();
+        if (user.length === 1 || user.length > 0) {
+          Alert.alert('Nome de usuário já existe!')
+          return;
+        }
         const pw = data.password.length > 0 ? await hashPassword(data.password) : null
         await database.write(async () => {
           await database.get<UserModel>('users')
@@ -223,11 +216,11 @@ export const Users = () => {
           <FormTitle>{focusedUser.username ? 'Alterar' : 'Adicionar'}</FormTitle>
 
           <BottomSheetControlledInput
-            name="username"
             style={styles.textInput}
-            placeholder="Usuário"
-            error={errors.username}
+            name="username"
             control={control}
+            error={errors.username}
+            placeholder="Usuário"
           />
 
 
@@ -243,11 +236,12 @@ export const Users = () => {
 
           <BottomSheetControlledInput
             style={styles.textInput}
+            control={control}
             placeholder="Nova Senha"
             name="password"
             secureTextEntry
             error={errors.password}
-            control={control}
+            
 
           />
 
@@ -290,6 +284,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderColor: "black",
     borderWidth: 2,
+    textAlignVertical: "center"
   },
 });
 

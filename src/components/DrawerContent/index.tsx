@@ -5,6 +5,7 @@ import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
 export default function DrawerContent(props) {
   const { signOut, user } = useAuth();
+ 
   const hello = "Olá, " + user.username
   return (
     <DrawerContentScrollView {...props}>

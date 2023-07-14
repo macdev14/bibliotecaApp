@@ -18,7 +18,7 @@ export function AdminStackReservationRoutes(){
             ),
           })}
         >
-            <Screen name="Admin" component={AdminReservations} />
+            <Screen name="Reservas de Usuários" component={AdminReservations} />
         </Navigator>
     )
 }

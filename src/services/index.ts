@@ -135,10 +135,10 @@ export async function fetchAvailableBooksForUser(userId: string, setBooks: Dispa
     const allReservedBooks = await database.collections
         .get<ReservationModel>('reservations')
         .query()
-        .fetch();    
+        .fetch();
 
     const allReservedBookIds = allReservedBooks.map(reservation => reservation.bookId);
-        
+
     const reservedBookIds = reservedBooks.map(reservation => reservation.bookId);
 
     const allBooks = await database.collections
@@ -146,8 +146,8 @@ export async function fetchAvailableBooksForUser(userId: string, setBooks: Dispa
         .query()
         .fetch();
 
-    const availableBooks = allBooks.filter(book => !reservedBookIds.includes(book.id) && !allReservedBookIds.includes(book.id) );
-    console.log("my available books: ",availableBooks);
+    const availableBooks = allBooks.filter(book => !reservedBookIds.includes(book.id) && !allReservedBookIds.includes(book.id));
+    console.log("my available books: ", availableBooks);
     setBooks(availableBooks);
 
 }
@@ -162,46 +162,53 @@ export const deleteReservationUserId = async (userId: string) =>
 // Excluir dados de Reserva de Livro
 export const deleteReservationBookId = async (bookId: string) =>
 
-    await database.get<BookModel>('reservations')
+    await database.get<ReservationModel>('reservations')
         .query(Q.where('book_id', bookId)).destroyAllPermanently()
 
 
 
 
 export const deleteUser = async (userId: string) => {
-            console.log("user id: ", userId);
-            const allBooks = await database.collections
-              .get<BookModel>('books')
-              .query(Q.where('user_id', userId))
-              .fetch();
-          
-            const bookIds = allBooks.map(book => book.id);
-            if (bookIds.length > 0  ) {
-            await database.write(async () => {
-              const reservationsToDelete = await database.collections
+    console.log("user id: ", userId);
+    const allBooks = await database.collections
+        .get<BookModel>('books')
+        .query(Q.where('user_id', userId))
+        .fetch();
+
+    const bookIds = allBooks.map(book => book.id);
+    if (bookIds.length > 0) {
+        await database.write(async () => {
+            const reservationsToDelete = await database.collections
                 .get<ReservationModel>('reservations')
                 .query(Q.where('book_id', Q.oneOf(bookIds)))
                 .fetch();
-          
-              for (const reservation of reservationsToDelete) {
-                await reservation.destroyPermanently();
-              }
-            });
-            await database.write(async () => {
-            await database.collections
-              .get<BookModel>('books')
-              .query(Q.where('user_id', userId)).destroyAllPermanently()
-            })
-        }
-            
 
-              await database.write(async () => {
-                await database.collections
-              .get<UserModel>('users')
-              .query(Q.where('id', userId)).destroyAllPermanently();
-              });
+            for (const reservation of reservationsToDelete) {
+                await reservation.destroyPermanently();
+            }
+        });
+        await database.write(async () => {
+            await database.collections
+                .get<BookModel>('books')
+                .query(Q.where('user_id', userId)).destroyAllPermanently()
+        })
+    }
+
+
+    await database.write(async () => {
+        await database.collections
+            .get<UserModel>('users')
+            .query(Q.where('id', userId)).destroyAllPermanently();
+    });
 };
-          
-    
-    
-    
+
+
+export const checkIfUserExists = async (userId: string) => await database.get<BookModel>('books')
+    .query(Q.where('book_id', userId)).fetch()
+    .then(res => res.length > 0)
+    .catch((e) => false)
+
+
+
+
+

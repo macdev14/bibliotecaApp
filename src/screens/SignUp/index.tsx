@@ -30,9 +30,8 @@ function SignUp() {
     resolver: yupResolver(schema)
   })
 
-  const handleSignUp = (data) => {
-    signUp(data.username, data.password, permissao);
-    
+  const handleSignUp = (data : FormData) => {
+    signUp(data.username, data.password, permissao).then(() => {Alert.alert("Usuário cadastrado com sucesso, realize o login!");navigation.navigate('SignIn')}).catch((e) =>Alert.alert(e.message)); 
   }
 
   return (

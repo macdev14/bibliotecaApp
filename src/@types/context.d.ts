@@ -13,6 +13,6 @@ interface User {
     loading: boolean;
     signIn(name:string, password:string): void;
     signOut(): void;
-    signUp(name:string, senha:string, permissao: Permissao): void;
+    signUp(name:string, senha:string, permissao: Permissao): Promise<void>;
   }
 

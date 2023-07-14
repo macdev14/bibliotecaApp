@@ -7,7 +7,7 @@ import AppRoutes from './app/index.routes';
 import AuthRoutes from './auth/index.routes';
 
 const Routes = () => {
-  const {signed, loading} = useAuth();
+  const {signed, loading, user} = useAuth();
   if (loading) {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>

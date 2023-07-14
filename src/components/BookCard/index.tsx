@@ -52,7 +52,7 @@ export const BookCard = ({ data, onEdit=undefined, onRemove=undefined, onReserve
       { isReservation && data.reservationDate && userObject ? <Name>Reservado por: {userObject.username} em {data.reservationDate || ''}</Name> : ''}
 
       <Options>
-        { (onEdit !== null && onEdit !== undefined && (isBook || isReservation) && (data.userId == user.id || user.permissions == 'super_user')) &&
+        { ((onEdit !== null && onEdit !== undefined && userObject.id == user.id) || user.permissions == 'super_user' ) &&
           <Option onPress={onEdit}>
             <Entypo
               name="edit"

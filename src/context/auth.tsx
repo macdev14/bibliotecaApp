@@ -12,18 +12,21 @@ import { database } from '../databases';
 import UserModel from '../databases/models/userModel';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 import { Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+
+import { checkIfUserExists } from '../services';
+import isEmpty from '../utils/typeCheck';
 const AuthContext = createContext({} as AuthContextData);
 export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<User>({} as User);
   const [loading, setLoading] = useState<boolean>(true);
-  const navigation = useNavigation();
+  
+
   useEffect(() => {
     async function loadStorageData() {
       const storagedUser = await AsyncStorage.getItem('@RNAuth:user');
-      if (storagedUser) {
-
-        setUser(JSON.parse(storagedUser));
+      const userParsed: User = JSON.parse(storagedUser as string);
+      if (userParsed) {
+        isEmpty(userParsed) ? signOut(): setUser(userParsed);
         setLoading(false);
       } else {
         signOut();
@@ -51,7 +54,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       if (valid) {
         console.log('Login bem-sucedido!');
         await AsyncStorage.setItem('@RNAuth:user', JSON.stringify({ username, permissions, id }));
-        setUser({ username, permissions, id });
+        setUser({ username, permissions, id } as User);
       } else {
         Alert.alert('Credenciais inválidas!');
       }
@@ -85,13 +88,13 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       }
     }
     console.log("creating user");
-    await database.write(async () => {
+    return await database.write(async () => {
       await database.get<UserModel>('users')
         .create(data => {
           data.username = usuario;
           data.password = password;
           data.permissions = permissao;
-        }).then(data => { Alert.alert("Usuário cadastrado com sucesso, realize o login!");return navigation.navigate('SignIn'); }).catch(err => { Alert.alert("Erro: " + err)});
+        })
 
     });
 
@@ -101,7 +104,7 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ signed: !!user, user, loading, signIn, signOut, signUp }}>
+      value={{ signed: !isEmpty(user), user, loading, signIn, signOut, signUp }}>
       {children}
     </AuthContext.Provider>
   );

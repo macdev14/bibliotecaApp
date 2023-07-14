@@ -167,7 +167,7 @@ export const Books = () => {
       <BottomSheet
         onChange={(e) => e == 0 && cleanAll()}
         ref={bottomSheetRef}
-        index={1}
+        index={books.length > 0 ? 0 : 1}
         snapPoints={['5%', '65%']}
       >
         <Form>
@@ -232,5 +232,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderColor: "black",
     borderWidth: 2,
+    textAlignVertical: "center",
   },
 });

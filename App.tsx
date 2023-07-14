@@ -6,14 +6,15 @@ import { NavigationContainer } from '@react-navigation/native';
 export default function App() {
   return (
 
-   
+     <AuthProvider>
     <NavigationContainer>
       <NativeBaseProvider>
-        <AuthProvider>
+      
           <Routes />
-        </AuthProvider>
+       
       </NativeBaseProvider>
     </NavigationContainer>
+     </AuthProvider>
     
   );
 }

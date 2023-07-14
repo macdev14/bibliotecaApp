@@ -22,8 +22,8 @@ export const AdminReservations = () => {
   const [availableBooks, setAvailableBooks] = useState<BookModel[]>([] as BookModel[]);
   const [allUsers, setAllUsers] = useState<UserModel[]>([] as UserModel[]);
 
-  const [selectedBook, setSelectedBook] = useState('');
-  const [selectedUser, setSelectedUser] = useState('');
+  const [selectedBook, setSelectedBook] = useState<string>('');
+  const [selectedUser, setSelectedUser] = useState<string>('');
 
   const bottomSheetRef = useRef<BottomSheet>({} as BottomSheet);
   async function fetchData() {
@@ -142,7 +142,7 @@ export const AdminReservations = () => {
 
       <BottomSheet
         ref={bottomSheetRef}
-        index={0}
+        index={reservations.length > 0 ? 0 : 1}
         snapPoints={['4%', '65%']}
         onChange={(e) => e == 0 && cleanAll()}
       >
