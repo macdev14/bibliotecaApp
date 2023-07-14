@@ -16,12 +16,12 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup"
 import { ISchema } from "yup";
 import { Q } from "@nozbe/watermelondb";
+import isEmpty from "../../utils/typeCheck";
 
 type FormData = {
   username: string;
   password: string;
   password_confirm: string;
-
 }
 
 let schema =
@@ -39,6 +39,14 @@ let schema =
     })
   }, [['password', 'password']]);
 
+  let schemaCreate =
+  yup.object().shape({
+    username: yup.string().required("Informe o seu usuario"),
+    password: yup.string().min(6, "A senha deve ter ao menos 6 dígitos").required("Informe a senha"),
+    password_confirm: yup.string().oneOf([yup.ref('password')], 'A senha de confirmação não confere.').required("Informe a senha de confirmação."),
+          
+  },);
+
 
 
 export const Users = () => {
@@ -46,21 +54,26 @@ export const Users = () => {
   const isFocused = useIsFocused();
   const [users, setUsers] = useState<UserModel[]>([]);
   const [focusedUser, setFocusedUser] = useState<UserModel>({} as UserModel);
-  // const [username, setUsername] = useState('');
-  // const [password, setPassword] = useState('');
+  
   const [permission, setPermission] = useState<Permissao>('normal_user');
-  // const [confirmPassword, setConfirmPassword] = useState('');
+ 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const { setValue, control, handleSubmit, formState: { errors } } = useForm({
-    resolver: yupResolver(schema),
+  const {clearErrors, setValue, control, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(isEmpty(focusedUser) ? schemaCreate : schema),
     mode: 'all'
   })
 
   const cleanAll = () => {
+
     setValue('password', '');
     setValue('password_confirm', '');
     setValue('username', '');
+
+    clearErrors('password');
+    clearErrors('password_confirm');
+    clearErrors('username');
+
     setPermission('normal_user');
     setFocusedUser({} as UserModel);
   }
