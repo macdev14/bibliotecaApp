@@ -17,7 +17,7 @@
 //       return destinationPath; // Update the selected file path state
 //     }
 //   } catch (error) {
-//     console.log('Error picking file:', error);
+//     ('Error picking file:', error);
 //   }
 // };
 

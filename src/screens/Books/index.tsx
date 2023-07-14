@@ -92,7 +92,7 @@ export const Books = () => {
       fetchData();
     }
     catch (error) {
-      console.log(error);
+      (error);
     }
 
   }

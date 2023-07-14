@@ -5,7 +5,6 @@ import {
   useEffect,
   useState,
 } from 'react';
-//   import * as auth from '../services/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Q } from '@nozbe/watermelondb';
 import { database } from '../databases';
@@ -13,13 +12,11 @@ import UserModel from '../databases/models/userModel';
 import { hashPassword, verifyPassword } from '../utils/crypto';
 import { Alert } from 'react-native';
 
-import { checkIfUserExists } from '../services';
 import isEmpty from '../utils/typeCheck';
 const AuthContext = createContext({} as AuthContextData);
 export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<User>({} as User);
   const [loading, setLoading] = useState<boolean>(true);
-  
 
   useEffect(() => {
     async function loadStorageData() {
@@ -49,10 +46,10 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
       }
       const user : UserModel = users[0];
       const { username, permissions, id } = user
-      console.log('JSON OBJECT: ', user);
+    
       const valid = await verifyPassword(password, user.password)
       if (valid) {
-        console.log('Login bem-sucedido!');
+       
         await AsyncStorage.setItem('@RNAuth:user', JSON.stringify({ username, permissions, id }));
         setUser({ username, permissions, id } as User);
       } else {
@@ -73,21 +70,21 @@ export const AuthProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const signUp = async (usuario :string, senha :string, permissao : Permissao) => {
 
     const password = await hashPassword(senha)
-    console.log("Password hashed");
+    
     const userCollection = database.get<UserModel>('users');
-    console.log("Got user: ", userCollection);
+    
     if(userCollection){
      
       let user = await userCollection.query(
         Q.where('username', usuario)
       ).fetch();
-      console.log("checking user: ", user);
+     
       if (user.length === 1 || user.length > 0) {
         Alert.alert('Usuario já existe!')
         return;
       }
     }
-    console.log("creating user");
+  
     return await database.write(async () => {
       await database.get<UserModel>('users')
         .create(data => {

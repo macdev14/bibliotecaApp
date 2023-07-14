@@ -98,11 +98,10 @@ export async function fetchAvailableBooks(setBooks: Dispatch<SetStateAction<Book
         .fetch();
 
     const availableBooks = allBooks.filter(book => !reservedBookIds.includes(book.id));
-    // console.log("All available books: ",availableBooks);
+    
     setBooks(availableBooks);
 
 }
-
 export async function fetchAvailableBooksIncludeSelectedBook(reservedBookId: string, setBooks: Dispatch<SetStateAction<BookModel[]>>) {
 
     const reservedBooks = await database.collections
@@ -111,14 +110,14 @@ export async function fetchAvailableBooksIncludeSelectedBook(reservedBookId: str
         .fetch();
 
     const reservedBookIds = reservedBooks.map(reservation => { return reservation.bookId != reservedBookId ? reservation.bookId : null });
-    console.log("book ids: ", reservedBookIds)
+    
     const allBooks = await database.collections
         .get<BookModel>('books')
         .query()
         .fetch();
 
     const availableBooks = allBooks.filter(book => !reservedBookIds.includes(book.id));
-    console.log("Available books: ", availableBooks);
+   
     setBooks(availableBooks);
 
 }
@@ -147,7 +146,7 @@ export async function fetchAvailableBooksForUser(userId: string, setBooks: Dispa
         .fetch();
 
     const availableBooks = allBooks.filter(book => !reservedBookIds.includes(book.id) && !allReservedBookIds.includes(book.id));
-    console.log("my available books: ", availableBooks);
+   
     setBooks(availableBooks);
 
 }
@@ -169,7 +168,7 @@ export const deleteReservationBookId = async (bookId: string) =>
 
 
 export const deleteUser = async (userId: string) => {
-    console.log("user id: ", userId);
+    
     const allBooks = await database.collections
         .get<BookModel>('books')
         .query(Q.where('user_id', userId))

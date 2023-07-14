@@ -69,7 +69,7 @@ export const AdminReservations = () => {
       fetchData();
     }
     catch (error) {
-      console.log(error);
+      (error);
     }
   }
 
@@ -110,7 +110,7 @@ export const AdminReservations = () => {
   }
 
   const cleanAll = () => {
-    console.log("cleanAll");
+   
     setReservation({} as ReservationModel); 
     setSelectedBook(''); 
     setSelectedUser('');
@@ -121,7 +121,7 @@ export const AdminReservations = () => {
     fetchData()
   }, [isFocused]);
 
-  console.log(reservation)
+  (reservation)
 
   return (
 

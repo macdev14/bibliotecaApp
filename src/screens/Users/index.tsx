@@ -79,7 +79,7 @@ export const Users = () => {
   }
 
   const handleUserSave = () => {
-    console.log("Called")
+   
     const accessLevelChanged = () => Alert.alert("Mudança de Nível de Acesso",
       "Será necessário fazer login novamente ao alterar o nível de acesso.", opcoes)
     if (focusedUser.permissions !== permission && user.id === focusedUser.id) {
@@ -95,7 +95,7 @@ export const Users = () => {
 
 
   async function handleSave(data: FormData) {
-    console.log('called', data);
+  
     try {
       if (data.password) {
         if (data.password.length < 6) {
@@ -143,7 +143,7 @@ export const Users = () => {
       fetchData();
     }
     catch (error) {
-      console.log(error);
+      (error);
     }
   }
 
@@ -177,7 +177,7 @@ export const Users = () => {
         onPress: () => '',
 
       },
-      { text: 'Confirmar', style: 'cancel', onPress: () => deleteUser(item.id).then(() => { setFocusedUser({} as UserModel); fetchData() }).catch(e => console.log(e)) },
+      { text: 'Confirmar', style: 'cancel', onPress: () => deleteUser(item.id).then(() => { setFocusedUser({} as UserModel); fetchData() }).catch(e => (e)) },
     ]
     Alert.alert("Atenção", "Ao excluir o usuário, seus livros e reservas serão apagados!", opcoesUsuario);
 
